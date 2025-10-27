@@ -2,10 +2,10 @@
   "name": "social-media",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "dev": "ts-node --esm backend/server.ts",
-    "start": "cross-env NODE_ENV=production ts-node --esm backend/server.ts",
+    "dev": "nodemon",
+    "start": "cross-env NODE_ENV=production ts-node backend/server.ts",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "private": true,

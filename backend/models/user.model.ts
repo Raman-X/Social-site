@@ -1,23 +1,6 @@
 import mongoose from "mongoose";
-import { Document, Types } from "mongoose";
 
-export interface IUser extends Document {
-  username: string;
-  fullName: string;
-  password: string;
-  email: string;
-  followers: Types.ObjectId[];
-  following: Types.ObjectId[];
-  profileImg?: string;
-  coverImg?: string;
-  bio?: string;
-  link?: string;
-  likedPosts: Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const userSchema = new mongoose.Schema<IUser>(
+const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -79,6 +62,6 @@ const userSchema = new mongoose.Schema<IUser>(
   { timestamps: true }
 );
 
-const User = mongoose.model<IUser>("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;
