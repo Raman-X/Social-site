@@ -1,9 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./connectdb/connectdb.ts";
-import { v2 as cloudinary } from "cloudinary";
 import cookieParser from "cookie-parser";
+import { v2 as cloudinary } from "cloudinary";
+
 import authRoutes from "./routes/auth.routes.ts";
+import userRoutes from "./routes/user.routes.ts";
 
 dotenv.config();
 
@@ -21,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to my site!");
