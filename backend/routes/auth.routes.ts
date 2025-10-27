@@ -1,5 +1,5 @@
 import express from "express";
-// import { login, logout, signup } from "../controllers/auth.controller.ts";
+import { login, logout, signup } from "../controllers/auth.controller.ts";
 
 const router = express.Router();
 router.get("/signup", signup);
