@@ -1,11 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
-import connectDB from "./connectdb/connectdb.ts";
+import connectDB from "./connectdb/connectdb.js";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 
-import authRoutes from "./routes/auth.routes.ts";
-import userRoutes from "./routes/user.routes.ts";
+import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import postRoutes from "./routes/post.route.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to my site!");
