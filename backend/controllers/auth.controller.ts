@@ -1,4 +1,4 @@
-import { generateTokenAndSetCookie } from "../utils/generateToken.js";
+import { generateTokenAndSetCookie } from "../utils/generateToken.ts";
 import User from "../models/user.model.ts";
 import bcrypt from "bcryptjs";
 
@@ -100,7 +100,6 @@ export const logout = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 export const getMe = async (req, res) => {
   try {
