@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import mongoose, { Types } from "mongoose";
 import Notification from "../models/notification.model";
 import Post from "../models/post.model";
 import User from "../models/user.model";
@@ -15,6 +16,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     const { text, img: imgBody } = req.body;
     let img = imgBody;
     const userId = req.user?._id;
+
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const user = await User.findById(userId);
@@ -29,7 +31,8 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       img = uploadedResponse.secure_url;
     }
 
-    const newPost = new Post({ user: userId, text, img });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const newPost = new Post({ user: userObjectId, text, img });
     await newPost.save();
 
     res.status(201).json(newPost);
@@ -46,6 +49,7 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
     const userId = req.user?._id;
+
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     if (!post) return res.status(404).json({ error: "Post not found" });
 
@@ -76,14 +80,15 @@ export const commentOnPost = async (req: AuthRequest, res: Response) => {
     const { text } = req.body;
     const postId = req.params.id;
     const userId = req.user?._id;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
     if (!text) return res.status(400).json({ error: "Text field is required" });
 
     const post = await Post.findById(postId);
     if (!post) return res.status(404).json({ error: "Post not found" });
 
-    post.comments.push({ user: userId, text });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    post.comments.push({ user: userObjectId, text });
     await post.save();
 
     res.status(200).json(post);
@@ -105,22 +110,30 @@ export const likeUnlikePost = async (req: AuthRequest, res: Response) => {
     const post = await Post.findById(postId);
     if (!post) return res.status(404).json({ error: "Post not found" });
 
-    const userLikedPost = post.likes.includes(userId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const userLikedPost = post.likes.some((id) => id.equals(userObjectId));
 
     if (userLikedPost) {
       // Unlike
-      await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
-      await User.updateOne({ _id: userId }, { $pull: { likedPosts: postId } });
-      const updatedLikes = post.likes.filter((id) => id.toString() !== userId);
+      await Post.updateOne({ _id: postId }, { $pull: { likes: userObjectId } });
+      await User.updateOne(
+        { _id: userObjectId },
+        { $pull: { likedPosts: postId } }
+      );
+
+      const updatedLikes = post.likes.filter((id) => !id.equals(userObjectId));
       res.status(200).json(updatedLikes);
     } else {
       // Like
-      post.likes.push(userId);
-      await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
+      post.likes.push(userObjectId);
+      await User.updateOne(
+        { _id: userObjectId },
+        { $push: { likedPosts: postId } }
+      );
       await post.save();
 
       const notification = new Notification({
-        from: userId,
+        from: userObjectId,
         to: post.user,
         type: "like",
       });
