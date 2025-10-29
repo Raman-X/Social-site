@@ -95,7 +95,6 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// ---------------- LOGOUT ----------------
 export const logout = async (_req: Request, res: Response) => {
   try {
     res.cookie("jwt", "", { maxAge: 0, httpOnly: true, sameSite: "strict" });
@@ -108,14 +107,12 @@ export const logout = async (_req: Request, res: Response) => {
   }
 };
 
-// ---------------- GET ME ----------------
+// ---------------- GET ME -----------
 export const getMe = async (req: Request, res: Response) => {
   try {
-    console.log(req);
-
-    // if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-    // res.status(200).json(req.user);
+    if (!(req as any).user)
+      return res.status(401).json({ error: "Unauthorized" });
+    res.status(200).json((req as any).user);
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.log("Error in getMe controller", error.message);

@@ -10,6 +10,7 @@ export const protectRoute = async (
   try {
     const token = req.cookies.jwt;
     const secret = process.env.JWT_SECRET;
+    console.log(req);
 
     if (!token)
       return res.status(401).json({ error: "Unauthorized: No Token Provided" });
@@ -27,6 +28,8 @@ export const protectRoute = async (
     if (!user) return res.status(404).json({ error: "User not found" });
 
     (req as any).user = user;
+    console.log((req as any).user);
+
     next();
   } catch (err: any) {
     console.log("Error in protectRoute middleware", err.message);

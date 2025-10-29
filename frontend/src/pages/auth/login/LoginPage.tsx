@@ -27,16 +27,17 @@ const LoginPage: React.FC = () => {
     isError,
     error,
     isPending,
-    // rename isLoading to isPending
   } = useMutation({
     mutationFn: async ({ username, password }: LoginFormData) => {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("http://localhost:8000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
+      console.log(data);
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       return data;
     },

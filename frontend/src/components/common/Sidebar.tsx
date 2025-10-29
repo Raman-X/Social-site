@@ -20,8 +20,9 @@ const Sidebar: React.FC = () => {
 
   const { mutate: logout } = useMutation({
     mutationFn: async (): Promise<void> => {
-      const res = await fetch("/api/auth/logout", {
+      const res = await fetch("http://localhost:8000/api/auth/logout", {
         method: "POST",
+        credentials: "include",
       });
 
       const data = await res.json();
