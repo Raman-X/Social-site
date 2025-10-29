@@ -1,31 +1,69 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 
 import LogoSvg from "../../../components/svgs/Logo";
 
-import { MdOutlineMail } from "react-icons/md";
+import {
+  MdOutlineMail,
+  MdPassword,
+  MdDriveFileRenameOutline,
+} from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import { MdPassword } from "react-icons/md";
-import { MdDriveFileRenameOutline } from "react-icons/md";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
-const SignUpPage = () => {
-  const [formData, setFormData] = useState({
+interface SignUpFormData {
+  email: string;
+  username: string;
+  fullName: string;
+  password: string;
+}
+
+interface ApiError {
+  message: string;
+}
+
+const SignUpPage: React.FC = () => {
+  const [formData, setFormData] = useState<SignUpFormData>({
     email: "",
     username: "",
     fullName: "",
     password: "",
   });
 
-  const handleSubmit = (e: any) => {
+  const { mutate, isError, isPending, error } = useMutation({
+    mutationFn: async ({
+      email,
+      username,
+      fullName,
+      password,
+    }: SignUpFormData) => {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, username, fullName, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create account");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Account created successfully");
+    },
+  });
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
+    mutate(formData);
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const isError = false;
 
   return (
     <div className="max-w-7xl mx-auto flex h-screen px-10">
@@ -88,9 +126,11 @@ const SignUpPage = () => {
             />
           </label>
           <button className="btn rounded-full btn-primary text-white">
-            Sign up
+            {isPending ? "Loading..." : "Sign up"}
           </button>
-          {isError && <p className="text-red-500">Something went wrong</p>}
+          {isError && (
+            <p className="text-red-500">{(error as ApiError)?.message}</p>
+          )}
         </form>
         <div className="flex flex-col lg:w-2/3 gap-2 mt-4">
           <p className="text-white text-lg">Already have an account?</p>

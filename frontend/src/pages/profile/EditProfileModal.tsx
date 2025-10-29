@@ -1,7 +1,17 @@
 import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+interface FormData {
+  fullName: string;
+  username: string;
+  email: string;
+  bio: string;
+  link: string;
+  newPassword: string;
+  currentPassword: string;
+}
 
-const EditProfileModal = () => {
-  const [formData, setFormData] = useState({
+const EditProfileModal: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
     fullName: "",
     username: "",
     email: "",
@@ -11,30 +21,37 @@ const EditProfileModal = () => {
     currentPassword: "",
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert("Profile updated successfully");
+  };
+
+  const openModal = () => {
+    const modal = document.getElementById(
+      "edit_profile_modal"
+    ) as HTMLDialogElement | null;
+    if (modal) modal.showModal();
   };
 
   return (
     <>
       <button
         className="btn btn-outline rounded-full btn-sm"
-        onClick={() =>
-          document.getElementById("edit_profile_modal").showModal()
-        }
+        onClick={openModal}
       >
         Edit profile
       </button>
+
       <dialog id="edit_profile_modal" className="modal">
         <div className="modal-box border rounded-md border-gray-700 shadow-md">
           <h3 className="font-bold text-lg my-3">Update Profile</h3>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Profile updated successfully");
-            }}
-          >
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-wrap gap-2">
               <input
                 type="text"
@@ -53,6 +70,7 @@ const EditProfileModal = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="flex flex-wrap gap-2">
               <input
                 type="email"
@@ -70,6 +88,7 @@ const EditProfileModal = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="flex flex-wrap gap-2">
               <input
                 type="password"
@@ -88,6 +107,7 @@ const EditProfileModal = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <input
               type="text"
               placeholder="Link"
@@ -96,11 +116,13 @@ const EditProfileModal = () => {
               name="link"
               onChange={handleInputChange}
             />
+
             <button className="btn btn-primary rounded-full btn-sm text-white">
               Update
             </button>
           </form>
         </div>
+
         <form method="dialog" className="modal-backdrop">
           <button className="outline-none">close</button>
         </form>
@@ -108,4 +130,5 @@ const EditProfileModal = () => {
     </>
   );
 };
+
 export default EditProfileModal;
