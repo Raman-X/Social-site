@@ -1,12 +1,18 @@
-import { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import HomePage from "./pages/home/HomePage.jsx";
+import SignUpPage from "./pages/auth/signup/SignUpPage.jsx";
+import LoginPage from "./pages/auth/login/LoginPage.jsx";
 
 const App = () => {
-  useEffect(() => {
-    fetch("/api/auth/me").then((res) => {
-      console.log(res);
-    });
-  }, []);
-  return <div>App</div>;
+  return (
+    <div className="flex max-w-2xl mx-auto">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </div>
+  );
 };
 
 export default App;
