@@ -1,16 +1,45 @@
 import { Link } from "react-router-dom";
-import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
-import { USERS_FOR_RIGHT_PANEL } from "../../utils/db/dummy";
+import { useQuery } from "@tanstack/react-query";
+import useFollow from "../../hooks/useFollow";
 
-const RightPanel = () => {
-  const isLoading = false;
+import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
+import LoadingSpinner from "./LoadingSpinner";
+
+// ---------- Types ----------
+interface SuggestedUser {
+  _id: string;
+  username: string;
+  fullName: string;
+  profileImg?: string;
+}
+
+// ---------- Component ----------
+const RightPanel: React.FC = () => {
+  const { data: suggestedUsers, isLoading } = useQuery<SuggestedUser[]>({
+    queryKey: ["suggestedUsers"],
+    queryFn: async (): Promise<SuggestedUser[]> => {
+      const res = await fetch("/api/users/suggested");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong!");
+      }
+
+      return data;
+    },
+  });
+
+  const { follow, isPending } = useFollow();
+
+  if (suggestedUsers?.length === 0) return <div className="md:w-64 w-0"></div>;
 
   return (
     <div className="hidden lg:block my-4 mx-2">
       <div className="bg-[#16181C] p-4 rounded-md sticky top-2">
         <p className="font-bold">Who to follow</p>
+
         <div className="flex flex-col gap-4">
-          {/* item */}
+          {/* Skeletons while loading */}
           {isLoading && (
             <>
               <RightPanelSkeleton />
@@ -19,8 +48,10 @@ const RightPanel = () => {
               <RightPanelSkeleton />
             </>
           )}
+
+          {/* Suggested Users */}
           {!isLoading &&
-            USERS_FOR_RIGHT_PANEL?.map((user) => (
+            suggestedUsers?.map((user) => (
               <Link
                 to={`/profile/${user.username}`}
                 className="flex items-center justify-between gap-4"
@@ -29,7 +60,10 @@ const RightPanel = () => {
                 <div className="flex gap-2 items-center">
                   <div className="avatar">
                     <div className="w-8 rounded-full">
-                      <img src={user.profileImg || "/avatar-placeholder.png"} />
+                      <img
+                        src={user.profileImg || "/avatar-placeholder.png"}
+                        alt={`${user.fullName}'s profile`}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col">
@@ -41,12 +75,16 @@ const RightPanel = () => {
                     </span>
                   </div>
                 </div>
+
                 <div>
                   <button
                     className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      follow(user._id);
+                    }}
                   >
-                    Follow
+                    {isPending ? <LoadingSpinner size="sm" /> : "Follow"}
                   </button>
                 </div>
               </Link>
@@ -56,4 +94,5 @@ const RightPanel = () => {
     </div>
   );
 };
+
 export default RightPanel;

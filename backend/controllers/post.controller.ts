@@ -53,7 +53,7 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
     if (!post) return res.status(404).json({ error: "Post not found" });
 
-    if (post.user.toString() !== userId) {
+    if (post.user.toString() != userId) {
       return res
         .status(401)
         .json({ error: "You are not authorized to delete this post" });
