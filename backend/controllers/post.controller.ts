@@ -121,7 +121,9 @@ export const likeUnlikePost = async (req: AuthRequest, res: Response) => {
         { $pull: { likedPosts: postId } }
       );
 
-      const updatedLikes = post.likes.filter((id) => !id.equals(userObjectId));
+      const updatedLikes = post.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
       res.status(200).json(updatedLikes);
     } else {
       // Like

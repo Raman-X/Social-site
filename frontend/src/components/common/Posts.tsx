@@ -1,43 +1,28 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
+import { useQuery } from "@tanstack/react-query";
+import type { PostType } from "./Post";
 
-// ---------- Types ----------
-interface User {
-  _id: string;
-  username: string;
-  fullName: string;
-  profileImg?: string;
-}
-
-interface Comment {
-  _id: string;
-  text: string;
-  user: User;
-}
-
-export interface PostType {
-  _id: string;
-  text: string;
-  img?: string;
-  user: User;
-  comments: Comment[];
-  likes: string[];
-}
-
+// ---------- Props ----------
 interface PostsProps {
-  feedType: "forYou" | "following";
+  feedType: "forYou" | "following" | "posts" | "likes";
+  username?: string;
+  userId?: string;
 }
 
 // ---------- Component ----------
-const Posts: React.FC<PostsProps> = ({ feedType }) => {
-  const getPostEndpoint = (): string => {
+const Posts: React.FC<PostsProps> = ({ feedType, username, userId }) => {
+  const getPostEndpoint = () => {
     switch (feedType) {
       case "forYou":
         return "/api/posts/all";
       case "following":
         return "/api/posts/following";
+      case "posts":
+        return username ? `/api/posts/user/${username}` : "/api/posts/all";
+      case "likes":
+        return userId ? `/api/posts/likes/${userId}` : "/api/posts/all";
       default:
         return "/api/posts/all";
     }
@@ -51,22 +36,18 @@ const Posts: React.FC<PostsProps> = ({ feedType }) => {
     refetch,
     isRefetching,
   } = useQuery<PostType[]>({
-    queryKey: ["posts", feedType],
-    queryFn: async (): Promise<PostType[]> => {
+    queryKey: ["posts", feedType, username, userId],
+    queryFn: async () => {
       const res = await fetch(POST_ENDPOINT);
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
-      }
-
-      return data;
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      return data as PostType[];
     },
   });
 
   useEffect(() => {
     refetch();
-  }, [feedType, refetch]);
+  }, [feedType, refetch, username, userId]);
 
   return (
     <>
