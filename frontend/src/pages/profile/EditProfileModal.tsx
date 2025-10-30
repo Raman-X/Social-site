@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+
+// ---------- Types ----------
+interface AuthUser {
+  _id: string;
+  fullName: string;
+  username: string;
+  email: string;
+  bio?: string;
+  link?: string;
+}
+
+interface EditProfileModalProps {
+  authUser: AuthUser | undefined;
+}
+
 interface FormData {
   fullName: string;
   username: string;
   email: string;
-  bio: string;
-  link: string;
+  bio?: string;
+  link?: string;
   newPassword: string;
   currentPassword: string;
 }
 
-const EditProfileModal: React.FC = () => {
+const EditProfileModal: React.FC<EditProfileModalProps> = ({ authUser }) => {
+  const queryClient = useQueryClient();
+
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     username: "",
@@ -21,29 +40,66 @@ const EditProfileModal: React.FC = () => {
     currentPassword: "",
   });
 
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation<
+    AuthUser,
+    Error
+  >({
+    mutationFn: async () => {
+      const res = await fetch(`/api/users/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      return data as AuthUser;
+    },
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+      ]);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (authUser) {
+      setFormData({
+        fullName: authUser.fullName,
+        username: authUser.username,
+        email: authUser.email,
+        bio: authUser.bio ?? "",
+        link: authUser.link ?? "",
+        newPassword: "",
+        currentPassword: "",
+      });
+    }
+  }, [authUser]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Profile updated successfully");
-  };
-
-  const openModal = () => {
-    const modal = document.getElementById(
-      "edit_profile_modal"
-    ) as HTMLDialogElement | null;
-    if (modal) modal.showModal();
+    updateProfile();
   };
 
   return (
     <>
       <button
         className="btn btn-outline rounded-full btn-sm"
-        onClick={openModal}
+        onClick={() => {
+          const dialog = document.getElementById(
+            "edit_profile_modal"
+          ) as HTMLDialogElement | null;
+          dialog?.showModal();
+        }}
       >
         Edit profile
       </button>
@@ -118,7 +174,7 @@ const EditProfileModal: React.FC = () => {
             />
 
             <button className="btn btn-primary rounded-full btn-sm text-white">
-              Update
+              {isUpdatingProfile ? "Updating..." : "Update"}
             </button>
           </form>
         </div>
