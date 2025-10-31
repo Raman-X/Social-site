@@ -73,12 +73,18 @@ const TestStream = ({ user }: any) => {
           role,
         },
       },
+      onJoinRoom: () => {
+        console.log("live stream started", sharedLinks);
+      },
+      onLeaveRoom: () => {
+        console.log("stream ended");
+      },
     });
   }, [roomID, role]);
 
   return (
     <div className="mt-4">
-      <div ref={containerRef} className="myCallContainer "></div>
+      <div ref={containerRef} className="myCallContainer"></div>
     </div>
   );
 };

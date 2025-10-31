@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import postRoutes from "./routes/post.route";
 import notificationRoutes from "./routes/notification.route";
+import liveStreamRoutes from "./routes/live-stream.route";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/live-stream", liveStreamRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to my site!");
