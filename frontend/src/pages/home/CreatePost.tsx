@@ -34,7 +34,21 @@ const CreatePost: React.FC = () => {
   const [img, setImg] = useState<string | null>(null);
   const imgRef = useRef<HTMLInputElement | null>(null);
 
-  const { data: authUser } = useQuery<User>({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<User | null>({
+    queryKey: ["authUser"],
+    queryFn: async (): Promise<User | null> => {
+      const res = await fetch("http://localhost:8000/api/auth/me", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        return null;
+      }
+
+      const data = await res.json();
+      return data;
+    },
+  });
   const queryClient = useQueryClient();
 
   const {

@@ -14,7 +14,7 @@ interface AuthUser {
 }
 
 interface EditProfileModalProps {
-  authUser: AuthUser | undefined;
+  authUser: any;
 }
 
 interface FormData {

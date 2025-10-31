@@ -18,7 +18,7 @@ export function getUrlParams(url = window.location.href) {
   return new URLSearchParams(urlStr);
 }
 
-const TestStream = ({ user }: any) => {
+const Stream = ({ user }: any) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const roomID = getUrlParams().get("roomID") || randomID(5);
   const roleStr = getUrlParams().get("role") || "Host";
@@ -62,16 +62,41 @@ const TestStream = ({ user }: any) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      return response.json();
     },
     onSuccess: (data) => {
-      console.log("✅ Live stream created successfully:", data);
+      console.log("Live stream created successfully:", data);
     },
     onError: (err: any) => {
       console.error("Failed to create live stream:", err.response?.data || err);
     },
   });
+
+  const deleteLiveStream = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/live-stream/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete stream: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      console.log("Live stream deleted successfully");
+    },
+    onError: (err: any) => {
+      console.error("Failed to delete live stream:", err);
+    },
+  });
+
+  const streamIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const appID = Number(import.meta.env.VITE_ZEGO_APP_ID);
@@ -102,17 +127,28 @@ const TestStream = ({ user }: any) => {
         config: { role },
       },
       onJoinRoom: () => {
-        console.log("🎥 Live stream started", sharedLinks);
+        console.log("Live stream started", sharedLinks);
 
         if (role === ZegoUIKitPrebuilt.Host) {
-          createLiveStream.mutate({
-            name: `${user.username}'s Stream`,
-            url: sharedLinks[0]?.url || window.location.href,
-          });
+          createLiveStream.mutate(
+            {
+              name: `${user.username}'s Stream`,
+              url: sharedLinks[0]?.url || window.location.href,
+            },
+            {
+              onSuccess: (data: any) => {
+                streamIdRef.current = data._id;
+              },
+            }
+          );
         }
       },
       onLeaveRoom: () => {
-        console.log("🚪 Stream ended");
+        console.log("Stream ended");
+
+        if (streamIdRef.current) {
+          deleteLiveStream.mutate(streamIdRef.current);
+        }
       },
     });
   }, []);
@@ -124,4 +160,4 @@ const TestStream = ({ user }: any) => {
   );
 };
 
-export default TestStream;
+export default Stream;

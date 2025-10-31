@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
-import TestStream from "./TestStream.js";
-import AllStreams from "./AllStreams.js";
+import Stream from "./pages/live-streams/Stream.js";
+import AllStreams from "./pages/live-streams/AllStreams.js";
 
 const App = () => {
   const { data: authUser, isLoading } = useQuery({
@@ -27,7 +27,7 @@ const App = () => {
         if (!res.ok) {
           throw new Error(data.error || "Something went wrong");
         }
-        console.log("authUser is here:", data);
+        // console.log("authUser is here:", data);
         return data;
       } catch (error: any) {
         throw new Error(error);
@@ -69,7 +69,7 @@ const App = () => {
         <Route
           path="/live"
           element={
-            authUser ? <TestStream user={authUser} /> : <Navigate to="/login" />
+            authUser ? <Stream user={authUser} /> : <Navigate to="/login" />
           }
         />
         <Route

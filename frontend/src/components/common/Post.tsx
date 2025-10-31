@@ -41,7 +41,21 @@ interface PostProps {
 const Post: React.FC<PostProps> = ({ post }) => {
   const [comment, setComment] = useState<string>("");
 
-  const { data: authUser } = useQuery<User>({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<User | null>({
+    queryKey: ["authUser"],
+    queryFn: async (): Promise<User | null> => {
+      const res = await fetch("http://localhost:8000/api/auth/me", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        return null;
+      }
+
+      const data = await res.json();
+      return data;
+    },
+  });
   const queryClient = useQueryClient();
 
   if (!authUser) return null; // prevent rendering before user data loads
