@@ -10,5 +10,5 @@
     "rootDir": "backend",
     "typeRoots": ["./node_modules/@types", "./backend/types/*"]
   },
-  "include": ["backend/**/*.ts", "backend/types/*.d.ts"]
+  "include": ["backend/**/*.ts", "backend/types/*.d.ts", "backend/routes"]
 }

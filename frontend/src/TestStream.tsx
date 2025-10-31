@@ -16,7 +16,7 @@ export function getUrlParams(url = window.location.href) {
   return new URLSearchParams(urlStr);
 }
 
-const TestStream = () => {
+const TestStream = ({ user }: any) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const roomID = getUrlParams().get("roomID") || randomID(5);
@@ -29,7 +29,6 @@ const TestStream = () => {
         ? ZegoUIKitPrebuilt.Cohost
         : ZegoUIKitPrebuilt.Audience;
 
-  // ✅ Explicitly type sharedLinks to match Zego config
   const sharedLinks: { name?: string; url?: string }[] = [];
 
   if (role === ZegoUIKitPrebuilt.Host || role === ZegoUIKitPrebuilt.Cohost) {
@@ -59,15 +58,15 @@ const TestStream = () => {
       appID,
       serverSecret,
       roomID,
-      randomID(5), // userID
-      "User_" + randomID(5) // userName
+      user._id, // userID
+      user.username // userName
     );
 
     const zp = ZegoUIKitPrebuilt.create(kitToken);
 
     zp.joinRoom({
       container: containerRef.current!,
-      sharedLinks, // ✅ Now correctly typed
+      sharedLinks,
       scenario: {
         mode: ZegoUIKitPrebuilt.LiveStreaming,
         config: {
@@ -78,11 +77,9 @@ const TestStream = () => {
   }, [roomID, role]);
 
   return (
-    <div
-      ref={containerRef}
-      className="myCallContainer"
-      style={{ width: "100vw", height: "100vh" }}
-    ></div>
+    <div className="mt-4">
+      <div ref={containerRef} className="myCallContainer "></div>
+    </div>
   );
 };
 
