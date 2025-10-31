@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 
 function randomID(len: number) {
@@ -18,7 +20,6 @@ export function getUrlParams(url = window.location.href) {
 
 const TestStream = ({ user }: any) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-
   const roomID = getUrlParams().get("roomID") || randomID(5);
   const roleStr = getUrlParams().get("role") || "Host";
 
@@ -43,6 +44,35 @@ const TestStream = ({ user }: any) => {
     url: `${window.location.protocol}//${window.location.host}${window.location.pathname}?roomID=${roomID}&role=Audience`,
   });
 
+  const createLiveStream = useMutation({
+    mutationFn: async (newStream: { name: string; url: string }) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/live-stream/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(newStream),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log("✅ Live stream created successfully:", data);
+    },
+    onError: (err: any) => {
+      console.error("Failed to create live stream:", err.response?.data || err);
+    },
+  });
+
   useEffect(() => {
     const appID = Number(import.meta.env.VITE_ZEGO_APP_ID);
     const serverSecret = import.meta.env.VITE_ZEGO_SERVER_SECRET;
@@ -58,8 +88,8 @@ const TestStream = ({ user }: any) => {
       appID,
       serverSecret,
       roomID,
-      user._id, // userID
-      user.username // userName
+      user._id,
+      user.username
     );
 
     const zp = ZegoUIKitPrebuilt.create(kitToken);
@@ -69,21 +99,26 @@ const TestStream = ({ user }: any) => {
       sharedLinks,
       scenario: {
         mode: ZegoUIKitPrebuilt.LiveStreaming,
-        config: {
-          role,
-        },
+        config: { role },
       },
       onJoinRoom: () => {
-        console.log("live stream started", sharedLinks);
+        console.log("🎥 Live stream started", sharedLinks);
+
+        if (role === ZegoUIKitPrebuilt.Host) {
+          createLiveStream.mutate({
+            name: `${user.username}'s Stream`,
+            url: sharedLinks[0]?.url || window.location.href,
+          });
+        }
       },
       onLeaveRoom: () => {
-        console.log("stream ended");
+        console.log("🚪 Stream ended");
       },
     });
-  }, [roomID, role]);
+  }, []);
 
   return (
-    <div className="mt-4 ">
+    <div className="mt-4">
       <div ref={containerRef} className="myCallContainer"></div>
     </div>
   );

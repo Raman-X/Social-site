@@ -41,6 +41,18 @@ const Sidebar: React.FC = () => {
 
   const { data: authUser } = useQuery<AuthUser | null>({
     queryKey: ["authUser"],
+    queryFn: async (): Promise<AuthUser | null> => {
+      const res = await fetch("http://localhost:8000/api/auth/me", {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        return null;
+      }
+
+      const data = await res.json();
+      return data;
+    },
   });
 
   return (
