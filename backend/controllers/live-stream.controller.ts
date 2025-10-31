@@ -3,7 +3,7 @@ import LiveStream from "../models/live-stream.model";
 
 export const getAllLiveStreams = async (req: Request, res: Response) => {
   try {
-    const liveStream = LiveStream.find()
+    const liveStream = await LiveStream.find()
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" });
 

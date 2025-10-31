@@ -83,7 +83,7 @@ const TestStream = ({ user }: any) => {
   }, [roomID, role]);
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 ">
       <div ref={containerRef} className="myCallContainer"></div>
     </div>
   );

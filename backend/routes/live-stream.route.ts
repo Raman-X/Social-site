@@ -1,9 +1,9 @@
 import express from "express";
-import { protectRoute } from "../middleware/protectRoute";
 import { getAllLiveStreams } from "../controllers/live-stream.controller";
+import { protectRoute } from "../middleware/protectRoute";
 
 const router = express.Router();
 
-router.get('/all',protectRoute,getAllLiveStreams);
+router.get("/all", protectRoute, getAllLiveStreams);
 
 export default router;

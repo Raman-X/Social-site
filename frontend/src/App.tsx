@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import TestStream from "./TestStream.js";
+import AllStreams from "./AllStreams.js";
 
 const App = () => {
   const { data: authUser, isLoading } = useQuery({
@@ -70,6 +71,10 @@ const App = () => {
           element={
             authUser ? <TestStream user={authUser} /> : <Navigate to="/login" />
           }
+        />
+        <Route
+          path="/all-live-streams"
+          element={authUser ? <AllStreams /> : <Navigate to="/login" />}
         />
       </Routes>
       {authUser && <RightPanel />}
