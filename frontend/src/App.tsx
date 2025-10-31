@@ -11,6 +11,8 @@ import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 
+
+
 const App = () => {
   const { data: authUser, isLoading } = useQuery({
     queryKey: ["authUser"],
